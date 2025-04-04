@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+
+{% block title %}
+View movies: {{ item.id }}
+{% endblock title %}
+
+{% block page_title %}
+View movies: {{ item.id }}
+{% endblock page_title %}
+
+
+{% block content %}
+<div class="mb-10">
+    <div>
+    <label><b>{{"name" | capitalize }}:</b> {{item.name}}</label>
+    </div>
+<div>
+    <label><b>{{"star" | capitalize }}:</b> {{item.star}}</label>
+    </div>
+<div>
+    <label><b>{{"active" | capitalize }}:</b> {{item.active}}</label>
+    </div>
+<br />
+<a href="/movies">Back to movies</a>
+</div>
+{% endblock content %}
