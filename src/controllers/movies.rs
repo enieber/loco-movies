@@ -91,6 +91,7 @@ pub async fn show(
 
 #[debug_handler]
 pub async fn add(
+    auth: auth::JWT,
     State(ctx): State<AppContext>,
     Form(params): Form<Params>,
 ) -> Result<Response> {
@@ -103,7 +104,11 @@ pub async fn add(
 }
 
 #[debug_handler]
-pub async fn remove(Path(id): Path<i32>, State(ctx): State<AppContext>) -> Result<Response> {
+pub async fn remove(
+    auth: auth::JWT,
+    Path(id): Path<i32>,
+    State(ctx): State<AppContext>
+) -> Result<Response> {
     let res_item = load_item(&ctx, id).await;
     match res_item {
         Ok(item) => {
@@ -118,12 +123,7 @@ pub async fn remove(Path(id): Path<i32>, State(ctx): State<AppContext>) -> Resul
             );
         }
     }
-    let response = Response::builder()
-           .status(StatusCode::OK)
-           .header("HX-Redirect", "/movies")  // Adiciona o header para o HTMX
-           .body(Body::empty())
-           .unwrap();
-    Ok(response)
+    format::render().redirect_with_header_key("HX-Redirect", "/movies")
 }
 
 pub fn routes() -> Routes {
