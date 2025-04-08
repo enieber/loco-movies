@@ -4,7 +4,7 @@
 use loco_rs::prelude::*;
 use serde::{Deserialize, Serialize};
 use sea_orm::{sea_query::Order, QueryOrder};
-use axum::debug_handler;
+use axum::{body::Body, debug_handler, http::{HeaderMap, StatusCode}};
 
 use crate::{
     models::_entities::movies::{ActiveModel, Column, Entity, Model},
@@ -55,7 +55,7 @@ pub async fn new(
 
 #[debug_handler]
 pub async fn update(
-     auth: auth::JWT,
+    auth: auth::JWT,
     Path(id): Path<i32>,
     State(ctx): State<AppContext>,
     Form(params): Form<Params>,
@@ -104,8 +104,26 @@ pub async fn add(
 
 #[debug_handler]
 pub async fn remove(Path(id): Path<i32>, State(ctx): State<AppContext>) -> Result<Response> {
-    load_item(&ctx, id).await?.delete(&ctx.db).await?;
-    format::empty()
+    let res_item = load_item(&ctx, id).await;
+    match res_item {
+        Ok(item) => {
+            tracing::debug!(
+                "find item to delete"
+            );
+            item.delete(&ctx.db).await?;
+        }
+        Err(_) => {
+            tracing::debug!(
+                "error to find item"
+            );
+        }
+    }
+    let response = Response::builder()
+           .status(StatusCode::OK)
+           .header("HX-Redirect", "/movies")  // Adiciona o header para o HTMX
+           .body(Body::empty())
+           .unwrap();
+    Ok(response)
 }
 
 pub fn routes() -> Routes {
